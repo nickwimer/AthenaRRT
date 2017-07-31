@@ -147,6 +147,13 @@ void integrate_2d_ctu(DomainS *pD)
   int ii,ics,ice,jj,jcs,jce,ips,ipe,jps,jpe;
 #endif
 
+
+Real M1, M2, M3, U1, U2, Em, pg, sig, M2M, ASZwx, ASZwy, Dw, sig0x, sig0y, w, h, rho, P0, grav, Eterm, rhoAir, rhod, v_in;
+#ifdef REACTION
+  Real Y[NSP], rhoX[NSP], XAir[NSP], X[NSP], TFuel;
+#endif
+
+
   /* VARIABLES NEEDED FOR CYLINDRICAL COORDINATES */
 #ifdef CYLINDRICAL
 #ifndef ISOTHERMAL
@@ -1878,6 +1885,104 @@ void integrate_2d_ctu(DomainS *pD)
 #endif
     }
 #endif
+
+
+/* Add Absorbing Sponge Zone damping */
+h                = par_getd("grid","x2max");
+w                = par_getd("grid","x1max");
+P0               = par_getd("problem","P0");
+grav             = par_getd("problem","grav");
+v_in             = par_getd("problem","v_in");
+ASZwx            = par_getd("problem","ASZwx");
+ASZwy            = par_getd("problem","ASZwy");
+sig0x            = par_getd("problem","sig0x");
+sig0y            = par_getd("problem","sig0y");
+#ifdef REACTION
+TFuel            = par_getd("problem","TFuel");
+  for (n=0; n<NSP; ++n) {
+    XAir[n] = 0.0;
+  }
+  XAir[NSP_O2] = 0.233;
+  XAir[NSP_N2] = 1.0 - XAir[NSP_O2];
+for (j=js; j<=je; ++j) {
+  for (i=is; i<=ie; ++i) {
+    cc_pos(pG,i,j,ks,&x1,&x2,&x3);
+    if (x1 <= ASZwx) {
+      sig = sig0x*(ASZwx-x1)*(ASZwx-x1)/(ASZwx*ASZwx);
+    } else {
+      sig = 0.0;
+    }
+      U1 = 0.1*v_in;
+      for (n=NMINSCALARS; n<NSP+NMINSCALARS; ++n) {
+        X[n-NMINSCALARS] = pG->U[ks][j][i].s[n]/pG->U[ks][j][i].d;
+      }
+      EOS_mass2mole(X,Y);
+      EOS_TPX_to_cons(300.0,P0,Y,&rhoAir,&Eterm,rhoX);
+      pg  =  grav*rhoAir*x2 + P0;
+      EOS_TPX_to_cons(300.0,pg,Y,&rhoAir,&Eterm,rhoX);
+
+      pG->U[ks][j][i].d  -= pG->dt*sig*(pG->U[ks][j][i].d-rhoAir);
+      pG->U[ks][j][i].M1 -= pG->dt*sig*(pG->U[ks][j][i].M1-rhoAir*U1);
+      pG->U[ks][j][i].M2 -= pG->dt*sig*(pG->U[ks][j][i].M2-0.0);
+      pG->U[ks][j][i].M3 -= pG->dt*sig*(pG->U[ks][j][i].M3-0.0);
+
+      if (x1 >= w-ASZwx) {
+      sig = sig0x*(x1-(w-ASZwx))*(x1-(w-ASZwx))/(ASZwx*ASZwx);
+    } else {
+      sig = 0.0;
+    }
+      U1 = -0.1*v_in;
+      for (n=NMINSCALARS; n<NSP+NMINSCALARS; ++n) {
+        X[n-NMINSCALARS] = pG->U[ks][j][i].s[n]/pG->U[ks][j][i].d;
+      }
+      EOS_mass2mole(XAir,Y);
+      EOS_TPX_to_cons(300.0,P0,Y,&rhoAir,&Eterm,rhoX);
+      pg  =  grav*rhoAir*x2 + P0;
+      EOS_TPX_to_cons(300.0,pg,Y,&rhoAir,&Eterm,rhoX);
+
+      pG->U[ks][j][i].d  -= pG->dt*sig*(pG->U[ks][j][i].d-rhoAir);
+      pG->U[ks][j][i].M1 -= pG->dt*sig*(pG->U[ks][j][i].M1-rhoAir*U1);
+      pG->U[ks][j][i].M2 -= pG->dt*sig*(pG->U[ks][j][i].M2-0.0);
+      pG->U[ks][j][i].M3 -= pG->dt*sig*(pG->U[ks][j][i].M3-0.0);
+
+
+    if (x2 >= h-ASZwy) {
+      sig = sig0y*(x2-(h-ASZwy))*(x2-(h-ASZwy))/(ASZwy*ASZwy);
+    } else {
+      sig = 0.0;
+    }
+      for (n=NMINSCALARS; n<NSP+NMINSCALARS; ++n) {
+        X[n-NMINSCALARS] = pG->U[ks][j][i].s[n]/pG->U[ks][j][i].d;
+      }
+      EOS_mass2mole(X,Y);
+      EOS_TPX_to_cons(300.0,P0,Y,&rhoAir,&Eterm,rhoX);
+      pg  =  grav*rhoAir*x2 + P0;
+      EOS_TPX_to_cons(300.0,pg,Y,&rhoAir,&Eterm,rhoX);
+      pG->U[ks][j][i].d  -= pG->dt*sig*(pG->U[ks][j][i].d-rhoAir);
+      pG->U[ks][j][i].M1 -= pG->dt*sig*(pG->U[ks][j][i].M1-0.0);
+      // pG->U[ks][j][i].M2 -= pG->dt*sig*(pG->U[ks][j][i].M2-0.0);
+      pG->U[ks][j][i].M3 -= pG->dt*sig*(pG->U[ks][j][i].M3-0.0); 
+
+      if (x2 <= ASZwy) {
+      sig = sig0y*(ASZwy-x2)*(ASZwy-x2)/(ASZwy*ASZwy);
+    } else {
+      sig = 0.0;
+    }
+      for (n=NMINSCALARS; n<NSP+NMINSCALARS; ++n) {
+        X[n-NMINSCALARS] = pG->U[ks][j][i].s[n]/pG->U[ks][j][i].d;
+      }
+      EOS_mass2mole(X,Y);
+      EOS_TPX_to_cons(300.0,P0,Y,&rhoAir,&Eterm,rhoX);
+      pg  =  grav*rhoAir*x2 + P0;
+      EOS_TPX_to_cons(300.0,pg,Y,&rhoAir,&Eterm,rhoX);
+      pG->U[ks][j][i].d  -= pG->dt*sig*(pG->U[ks][j][i].d-rhoAir);
+      pG->U[ks][j][i].M1 -= pG->dt*sig*(pG->U[ks][j][i].M1-0.0);
+      // pG->U[ks][j][i].M2 -= pG->dt*sig*(pG->U[ks][j][i].M2-0.0);
+      pG->U[ks][j][i].M3 -= pG->dt*sig*(pG->U[ks][j][i].M3-0.0); 
+  }
+}
+#endif
+
 
 /*=== STEP 12: Update cell-centered values for a full timestep ===============*/
 
