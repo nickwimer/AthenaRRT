@@ -16,6 +16,7 @@
 #   --with-problem='name'                 (use prob/name.c as problem generator)
 #   --with-gas=[hydro,mhd]                              (hydro or mhd algorithm)
 #   --with-eos=[isothermal, adiabatic]                       (equation of state)
+#   --with-reaction=[infinitely_fast]                         (type of reaction) 
 #   --with-nscalars=n                               (number of advected scalars)
 #   --with-gravity=[fft,fft_disk,fft_obc,multigrid]               (self-gravity)
 #   --with-particles=[feedback,passive]              (dust particle integration)
@@ -158,6 +159,30 @@ elif test "$gravity_algorithm" = "none"; then
 else
   AC_MSG_ERROR([expected --with-gravity=fft, fft_disk, fft_obc, or multigrid])
 fi
+
+#-------------------------------------------------------------------------------
+# PHYSICS PACKAGE: reactions
+#  --with-reaction= [infinitely_fast]
+
+AC_SUBST(REACTION_DEFINE)
+AC_SUBST(REACTION_CLASS)
+AC_SUBST(REACTION_TYPE)
+AC_ARG_WITH(reaction, [  --with-reaction=REACTION_CLASS   Reaction model (infinitely_fast)],
+            reaction_model=$withval, reaction_model=none)
+
+if test "$reaction_model" = "infinitely_fast"; then
+  REACTION_DEFINE="REACTION"
+  REACTION_CLASS="REACTION_INFINITELY_FAST"
+  REACTION_TYPE="REACTION_INFINITELY_FAST"
+
+elif test "$reaction_model" = "none"; then
+  REACTION_DEFINE="REACTION_NONE"
+  REACTION_CLASS="NO_REACTION_CLASS"
+  REACTION_TYPE="NO_REACTION"
+else
+  AC_MSG_ERROR([expected --with-reaction=infinitely_fast])
+fi
+
 
 #-------------------------------------------------------------------------------
 # PHYSICS PACKAGE: particles
@@ -622,6 +647,7 @@ if test "$gravity_algorithm" = "none"; then
 else
   echo "Self-gravity:            $SELF_GRAVITY_ALGORITHM"
 fi
+echo "Reaction type:           $REACTION_TYPE"
 echo "Resistivity:             $RESISTIVITY_MODE_USER"
 echo "Viscosity:               $VISCOSITY_MODE_USER"
 echo "Thermal conduction:      $CONDUCTION_MODE_USER"

@@ -654,6 +654,9 @@ CONDUCTION_MODE
 COORD
 FEEDBACK_DEFINE
 PARTICLES_ALGORITHM
+REACTION_TYPE
+REACTION_CLASS
+REACTION_DEFINE
 SELF_GRAVITY_ALGORITHM
 SELF_GRAVITY_DEFINE
 NSCALARS
@@ -716,6 +719,7 @@ with_gas
 with_eos
 with_nscalars
 with_gravity
+with_reaction
 with_particles
 with_coord
 enable_conduction
@@ -1380,6 +1384,7 @@ Optional Packages:
 --with-eos=EOS  Equation of state (adiabatic,isothermal)
 --with-nscalars=n (default is 0)
 --with-gravity=SELF_GRAVITY_ALGORITHM  Algorithm for self gravity (fft, fft_disk, fft_obc, multigrid)
+  --with-reaction=REACTION_CLASS   Reaction model (infinitely_fast)
 --with-particles=PARTICLES_ALGORITHM  particle integration algorithm (feedback, passive)
 --with-coord=COORD  Coordinate System (cartesian,cylindrical)
 --with-order=ORDER      Order of Accuracy (1,2,3,2p,3p)
@@ -3131,6 +3136,36 @@ elif test "$gravity_algorithm" = "none"; then
 else
   as_fn_error $? "expected --with-gravity=fft, fft_disk, fft_obc, or multigrid" "$LINENO" 5
 fi
+
+#-------------------------------------------------------------------------------
+# PHYSICS PACKAGE: reactions
+#  --with-reaction= [infinitely_fast]
+
+
+
+
+
+# Check whether --with-reaction was given.
+if test "${with_reaction+set}" = set; then :
+  withval=$with_reaction; reaction_model=$withval
+else
+  reaction_model=none
+fi
+
+
+if test "$reaction_model" = "infinitely_fast"; then
+  REACTION_DEFINE="REACTION"
+  REACTION_CLASS="REACTION_INFINITELY_FAST"
+  REACTION_TYPE="REACTION_INFINITELY_FAST"
+
+elif test "$reaction_model" = "none"; then
+  REACTION_DEFINE="REACTION_NONE"
+  REACTION_CLASS="NO_REACTION_CLASS"
+  REACTION_TYPE="NO_REACTION"
+else
+  as_fn_error $? "expected --with-reaction=infinitely_fast" "$LINENO" 5
+fi
+
 
 #-------------------------------------------------------------------------------
 # PHYSICS PACKAGE: particles
@@ -5650,6 +5685,7 @@ if test "$gravity_algorithm" = "none"; then
 else
   echo "Self-gravity:            $SELF_GRAVITY_ALGORITHM"
 fi
+echo "Reaction type:           $REACTION_TYPE"
 echo "Resistivity:             $RESISTIVITY_MODE_USER"
 echo "Viscosity:               $VISCOSITY_MODE_USER"
 echo "Thermal conduction:      $CONDUCTION_MODE_USER"

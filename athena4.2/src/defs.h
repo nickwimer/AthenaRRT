@@ -20,13 +20,13 @@
  *  (user modified via configure) */
 
 /* Version identifier when configure was last run */
-#define CONFIGURE_DATE "Mon Jul 31 14:09:51 MDT 2017"
+#define CONFIGURE_DATE "Tue Sep 12 12:46:43 MDT 2017"
 
 /* Problem generator with which Athena is compiled */
-#define A_PROBLEM "rt"
+#define A_PROBLEM "inf_pool_fire"
 
 /* HYDRO or MHD */
-#define MHD
+#define HYDRO
 
 /* ADIABATIC or ISOTHERMAL or ... */
 #define ADIABATIC
@@ -42,11 +42,16 @@
 #define CARTESIAN
 
 /* Number of passively advected scalars */
-#define NSCALARS 0
+#define NSCALARS 5
 
 /* Self-gravity */
 #define NO_SELF_GRAVITY
 #define SELF_GRAVITY_NONE
+
+/* Reactions */
+#define REACTION
+#define REACTION_INFINITELY_FAST
+#define REACTION_INFINITELY_FAST
 
 /* Particles */
 #define NO_PARTICLES
@@ -54,7 +59,7 @@
 
 /* resistivity, viscosity, and thermal conduction */
 #define NO_RESISTIVITY
-#define NO_VISCOSITY
+#define VISCOSITY
 #define NO_THERMAL_CONDUCTION
 #define NO_STS
 
@@ -68,7 +73,7 @@
 /* flux type
  * ROE_FLUX, HLLE_FLUX, HLLC_FLUX, HLLD_FLUX, FORCE_FLUX, EXACT_FLUX,
  * TWO_SHOCK_FLUX */
-#define ROE_FLUX
+#define HLLC_FLUX
 
 /* unsplit integrator:
  * CTU_INTEGRATOR or VL_INTEGRATOR */
@@ -84,7 +89,7 @@
 #define NO_WRITE_GHOST_CELLS
 
 /* MPI parallelism: MPI_PARALLEL or NO_MPI_PARALLEL */
-#define NO_MPI_PARALLEL
+#define MPI_PARALLEL
 
 /* H-correction: H_CORRECTION or NO_H_CORRECTION */
 #define NO_H_CORRECTION

@@ -33,7 +33,7 @@ ifeq (NO_FFT,FFT_ENABLED)
   FFTWINC = -I/usr/include
 endif
 
-ifeq (NO_MPI_PARALLEL,MPI_PARALLEL)
+ifeq (MPI_PARALLEL,MPI_PARALLEL)
   CC = mpicc 
   LDR = mpicc 
 endif
@@ -105,7 +105,7 @@ endif
 endif
 endif
 
-ifeq (NO_MPI_PARALLEL,NO_MPI_PARALLEL)
+ifeq (MPI_PARALLEL,NO_MPI_PARALLEL)
   MPIINC = 
   MPILIB = 
 endif

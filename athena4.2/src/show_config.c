@@ -55,6 +55,12 @@ void show_config(void)
   ath_pout(0," Self-gravity:            OFF\n");
 #endif
 
+#if defined(REACTION_INFINITELY_FAST)
+  ath_pout(0," Reactions:               Single setp infinitely-fast methane chemistry\n");
+#else
+  ath_pout(0," Reactions:               OFF\n");
+#endif
+
 #if defined(RESISTIVITY)
   ath_pout(0," Resistivity:             ON\n");
 #else

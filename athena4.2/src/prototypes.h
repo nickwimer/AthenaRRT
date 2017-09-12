@@ -223,6 +223,11 @@ void get_eta_user(GridS *pG, int i, int j, int k,
                              Real *eta_O, Real *eta_H, Real *eta_A);
 #endif
 
+/* reactions.c */
+VGFun_t reaction_init(GridS *pG, DomainS *pD);
+#ifdef REACTION
+void reaction_infinitely_fast(GridS *pG);
+#endif
 
 /*----------------------------------------------------------------------------*/
 /* restart.c  */
